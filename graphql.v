@@ -1,7 +1,7 @@
 module graphql
 
 import strconv
-// import http
+import http
 import json
 
 pub struct VarValue {
@@ -41,20 +41,28 @@ struct StringVar {
 	value string
 }
 
+struct RequestBody {
+	vars string
+	query string
+}
+
 pub fn new_client(url string) &Client {
 	return &Client{
 		url: url
 	}
 }
 
-// pub fn (c &Client) run(r &GraphqlRequest) string {
-// 	vars := ""
-// 	for key, val in r.vars {
+pub fn (c &Client) run(r &GraphqlRequest) {
+	mut vars := ""
+	for key, val in r.vars {
+		vars += parse_var(key, val)
+	}
+	req := http.new_request("POST", c.url, json.encode(RequestBody{vars: vars, query: r.query}))
 
-// 	}
-// 	req := http.new_GraphqlRequest("POST", c.url)
-// 	req.add_header("")
-// }
+	for key, val in r.headers {
+		req.add_header(key, val)
+	}
+}
 
 pub fn new_request(q string) &GraphqlRequest {
 	return &GraphqlRequest {
